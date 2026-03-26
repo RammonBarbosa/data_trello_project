@@ -1,0 +1,13 @@
+# Docker e Banco de Dados
+data/
+db_data/
+*.db
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+.env
+
+# Outros
+.DS_Store
