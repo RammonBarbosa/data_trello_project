@@ -28,8 +28,11 @@ Motivo: Garante que os dados sejam inseridos de forma relacional e segura.
 
 🐳 Infraestrutura com Docker
 O uso de containers é o diferencial técnico deste projeto por garantir:
+
 Reprodutibilidade: O projeto roda exatamente igual em qualquer máquina.
+
 Isolamento: As dependências (Python, Pandas, bibliotecas SQL) ficam dentro do container, sem sujar seu sistema operacional.
+
 Padronização: Facilita o deploy em ambientes de produção.
 
 ---
