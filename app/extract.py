@@ -1,7 +1,7 @@
 import requests
 import os
 def extract_data():
-    # Substitua pelas suas chaves do Trello (conseguidas no Trello Power-Up Admin)
+
     API_KEY = os.getenv('TRELLO_API_KEY')
     TOKEN = os.getenv('TRELLO_TOKEN')
     BOARD_ID = 'GstiuzaC' # Aquele código que aparece na URL do seu quadro
