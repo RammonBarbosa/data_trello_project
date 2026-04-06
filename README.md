@@ -1,6 +1,6 @@
 📊 Trello Data Pipeline (ETL) com Docker & PostgreSQL
 
-Este projeto demonstra a construção de um pipeline de dados (ETL) profissional, projetado para extrair informações
+Este projeto demonstra a construção de um pipeline de dados (ETL), projetado para extrair informações
 da API do Trello, realizar transformações e carregar os dados em um banco PostgreSQL para apoio à decisão.
 
 🏗️ Arquitetura do Projeto
