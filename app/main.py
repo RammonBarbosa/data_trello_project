@@ -17,5 +17,5 @@ def run_pipeline():
     else:
         print("Nenhum dado para salvar.")
 
-if __name__ == "_main_":
+if __name__ == "__main__":
     run_pipeline()
