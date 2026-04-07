@@ -1,15 +1,35 @@
 import requests
 import os
+
 def extract_data():
     API_KEY = os.getenv('TRELLO_API_KEY')
     TOKEN = os.getenv('TRELLO_TOKEN')
-    BOARD_ID = 'GstiuzaC' # Aquele código que aparece na URL do seu quadro
+    BOARD_ID = os.getenv('TRELLO_BOARD_ID') 
     
-    url = f"https://api.trello.com/1/boards/{BOARD_ID}/cards?key={API_KEY}&token={TOKEN}"
-    response = requests.get(url)
-    if response.status_code == 200:
-        print("Extração concluída com sucesso!")
-        return response.json() # Retorna uma lista de dicionários (JSON)
+    params = {'key': API_KEY, 'token': TOKEN}
+
+    # 1. Puxando os Cartões
+    url_cards = f"https://api.trello.com/1/boards/{BOARD_ID}/cards"
+    resp_cards = requests.get(url_cards, params=params)
+    
+    # 2. Puxando as Listas (Para pegar os Nomes!)
+    url_lists = f"https://api.trello.com/1/boards/{BOARD_ID}/lists"
+    resp_lists = requests.get(url_lists, params=params)
+    
+    if resp_cards.status_code == 200 and resp_lists.status_code == 200:
+        cartoes = resp_cards.json()
+        listas = resp_lists.json()
+        
+        # Criando o Dicionário de Tradução (De-Para)
+        mapa_listas = {lista['id']: lista['name'] for lista in listas}
+        
+        # Injetando o nome correto em cada cartão
+        for cartao in cartoes:
+            # Pega o ID da lista do cartão, procura no mapa, e salva o nome
+            cartao['nome_lista'] = mapa_listas.get(cartao['idList'], 'Desconhecida')
+            
+        print("Extração concluída com sucesso (Cartões e Listas combinados)!")
+        return cartoes
     else:
-        print(f"Erro na extração: {response.status_code}")
+        print("Erro na extração!")
         return []

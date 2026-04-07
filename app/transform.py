@@ -4,16 +4,19 @@ def transform_data(raw_json):
     if not raw_json:
         return pd.DataFrame()
 
-    # Transforma o JSON bruto em uma tabela (DataFrame)
     df = pd.DataFrame(raw_json)
     
-    # Seleciona apenas as colunas que interessam para análise
-    # Exemplo: Nome do cartão, Descrição, Data de última atividade
-    cols_interessantes = ['name', 'desc', 'dateLastActivity', 'idList']
+    # Tratamento das Etiquetas (continua perfeito!)
+    df['etiquetas'] = df['labels'].apply(
+        lambda x: ', '.join([l['name'] for l in x]) if isinstance(x, list) else ''
+    )
+    
+    # O 'nome_lista' já vem pronto da extração, é só selecionar!
+    cols_interessantes = ['name', 'desc', 'dateLastActivity', 'idList', 'nome_lista', 'etiquetas']
     df_clean = df[cols_interessantes].copy()
     
-    # Renomeia para português para ficar mais fácil no DBeaver
-    df_clean.columns = ['nome_tarefa', 'descricao', 'ultima_atividade', 'id_lista']
+    # Renomear para português
+    df_clean.columns = ['nome_tarefa', 'descricao', 'ultima_atividade', 'id_lista', 'nome_lista', 'etiquetas']
     
-    print(f"Transformação concluída: {len(df_clean)} tarefas processadas.")
+    print(f"Transformação concluída: {len(df_clean)} tarefas processadas com sucesso.")
     return df_clean
