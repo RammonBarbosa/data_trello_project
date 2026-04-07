@@ -12,7 +12,7 @@ def extract_data():
     url_cards = f"https://api.trello.com/1/boards/{BOARD_ID}/cards"
     resp_cards = requests.get(url_cards, params=params)
     
-    # 2. Puxando as Listas (Para pegar os Nomes!)
+    # 2. Puxando as Listas 
     url_lists = f"https://api.trello.com/1/boards/{BOARD_ID}/lists"
     resp_lists = requests.get(url_lists, params=params)
     
@@ -20,7 +20,7 @@ def extract_data():
         cartoes = resp_cards.json()
         listas = resp_lists.json()
         
-        # Criando o Dicionário de Tradução (De-Para)
+        # Criando o Dicionário de Tradução 
         mapa_listas = {lista['id']: lista['name'] for lista in listas}
         
         # Injetando o nome correto em cada cartão
