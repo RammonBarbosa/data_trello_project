@@ -1,4 +1,5 @@
 📊 Trello Data Pipeline (ETL) Cloud Native
+
 Docker | Python | Supabase (PostgreSQL) | GitHub Actions | Power BI
 
 Este projeto apresenta um pipeline de dados ETL (Extract, Transform, Load) completo e automatizado. Ele extrai dados da API do Trello, processa-os via Python e os armazena em um banco de dados PostgreSQL na nuvem (Supabase), com atualização automática via GitHub Actions.
