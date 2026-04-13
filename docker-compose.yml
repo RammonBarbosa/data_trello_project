@@ -1,10 +1,10 @@
-version: '3.8'
-
 services:
   app:
     build: .
     env_file:
       - .env
+    ports:
+      - "8000:8000"  # Libera o acesso à API
     volumes:
       - ./data:/app/data
     depends_on:
@@ -18,4 +18,3 @@ services:
       - POSTGRES_DB=trello_db
     ports:
       - "5432:5432"
-      
