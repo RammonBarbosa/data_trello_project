@@ -6,9 +6,10 @@ def transform_data(raw_json):
 
     df = pd.DataFrame(raw_json)
     
-    # Tratamento das Etiquetas (continua perfeito!)
+    # Tratamento das Etiquetas com ORDENAÇÃO
+    # Adicionamos o sorted() para garantir que '1. ANO' venha antes de '2. RPA'
     df['etiquetas'] = df['labels'].apply(
-        lambda x: ', '.join([l['name'] for l in x]) if isinstance(x, list) else ''
+        lambda x: ', '.join(sorted([l['name'] for l in x])) if isinstance(x, list) else ''
     )
     
     # O 'nome_lista' já vem pronto da extração, é só selecionar!
