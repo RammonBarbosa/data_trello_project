@@ -1,20 +1,11 @@
+version: '3.8'
+
 services:
   app:
     build: .
     env_file:
       - .env
     ports:
-      - "8000:8000"  # Libera o acesso à API
-    volumes:
-      - ./data:/app/data
-    depends_on:
-      - db
-
-  db:
-    image: postgres:15
-    environment:
-      - POSTGRES_USER=user
-      - POSTGRES_PASSWORD=password
-      - POSTGRES_DB=trello_db
-    ports:
-      - "5432:5432"
+      - "8000:8000"  # Permite que você acesse http://localhost:8000
+    # Removi o volumes e o depends_on porque o banco agora é externo (Supabase)
+    restart: always
