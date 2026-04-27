@@ -6,7 +6,7 @@ def extract_data():
     TOKEN = os.getenv('TRELLO_TOKEN')
     BOARD_ID = os.getenv('TRELLO_BOARD_ID') 
     
-    # Adicionamos 'limit': 1000 para garantir que pegamos o máximo por lote
+    # Parâmetros base
     params = {'key': API_KEY, 'token': TOKEN, 'limit': 1000}
 
     # 1. Puxando as Listas 
@@ -15,13 +15,13 @@ def extract_data():
     listas = resp_lists.json() if resp_lists.status_code == 200 else []
     mapa_listas = {lista['id']: lista['name'] for lista in listas}
 
-    # 2. Puxando os Cartões com Paginação
+    # 2. Puxando os Cartões com Paginação e Filtro de Duplicatas
     all_cards = []
+    seen_ids = set() 
     last_id = None
     url_cards = f"https://api.trello.com/1/boards/{BOARD_ID}/cards"
 
     while True:
-        # Se já temos o ID do último cartão do lote anterior, usamos o 'before'
         if last_id:
             params['before'] = last_id
         
@@ -33,15 +33,24 @@ def extract_data():
             
         batch = response.json()
         
-        if not batch: # Se a lista vier vazia, terminamos
+        if not batch:
             break
             
-        all_cards.extend(batch)
-        last_id = batch[-1]['id'] # Guardamos o ID do último para a próxima volta
+        # Filtra apenas o que ainda não vimos nesta rodada
+        new_cards = [c for c in batch if c['id'] not in seen_ids]
         
-        print(f"Lote capturado: {len(all_cards)} cartões processados...")
+        if not new_cards:
+            break
+            
+        all_cards.extend(new_cards)
+        
+        # Alimenta o set de IDs para a próxima verificação
+        for c in new_cards:
+            seen_ids.add(c['id'])
+            
+        last_id = batch[-1]['id']
+        print(f"Lote capturado: {len(all_cards)} cartões únicos...")
 
-        # Se o lote veio com menos de 1000, significa que não há mais cartões
         if len(batch) < 1000:
             break
 
