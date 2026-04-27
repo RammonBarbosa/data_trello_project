@@ -1,10 +1,9 @@
-name: Trello Sync Fast
+name: Trello Pipeline
 
 on:
   schedule:
-    # O GitHub usa o horário UTC. 08:00 Brasília = 11:00 UTC
+    # 08:00 Brasília = 11:00 UTC
     - cron: '0 11 * * *'
-  # Mantemos o dispatch apenas como "plano B" para emergências
   workflow_dispatch: 
 
 jobs:
@@ -21,12 +20,18 @@ jobs:
           cache: 'pip'
 
       - name: Instalar Dependências
-        run: pip install -r requirements.txt
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
 
       - name: Executar Pipeline
         env:
+          # O GitHub injeta as Secrets aqui como variáveis de ambiente reais
           TRELLO_API_KEY: ${{ secrets.TRELLO_API_KEY }}
           TRELLO_TOKEN: ${{ secrets.TRELLO_TOKEN }}
           TRELLO_BOARD_ID: ${{ secrets.TRELLO_BOARD_ID }}
           DIRECT_URL: ${{ secrets.DIRECT_URL }}
-        run: python app/main.py
+        run: |
+          # Adiciona a pasta 'app' ao caminho de busca do Python para evitar erros de importação
+          export PYTHONPATH=$PYTHONPATH:$(pwd)/app
+          python app/main.py
