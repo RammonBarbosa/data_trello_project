@@ -2,10 +2,10 @@ name: Trello ETL Automation
 
 on:
   schedule:
-    - cron: '0 11 * * *' # Roda às 08:00 no horário de Brasília (UTC-3)
+    - cron: '0 11 * * *' # 08:00 Brasília
   push:
     branches: [ main ]
-  workflow_dispatch: # Permite rodar manualmente pelo site do GitHub
+  workflow_dispatch: 
 
 jobs:
   run-etl:
@@ -14,21 +14,16 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.9'
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
 
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
-
-      - name: Run ETL Script
+      - name: Build and Run Docker
         env:
-          # Aqui o GitHub pega as senhas que você vai cadastrar no site dele
+          # Injeta as chaves do GitHub Secrets no ambiente do Docker
           TRELLO_API_KEY: ${{ secrets.TRELLO_API_KEY }}
           TRELLO_TOKEN: ${{ secrets.TRELLO_TOKEN }}
           TRELLO_BOARD_ID: ${{ secrets.TRELLO_BOARD_ID }}
           DIRECT_URL: ${{ secrets.DIRECT_URL }}
-        run: python app/main.py
+        run: |
+          # O --build força a atualização do script
+          docker compose up --build app
