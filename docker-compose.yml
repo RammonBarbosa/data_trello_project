@@ -1,11 +1,11 @@
-version: '3.8'
-
 services:
   app:
     build: .
-    env_file:
-      - .env
+    
+    environment:
+      - TRELLO_API_KEY=${TRELLO_API_KEY}
+      - TRELLO_TOKEN=${TRELLO_TOKEN}
+      - TRELLO_BOARD_ID=${TRELLO_BOARD_ID}
+      - DIRECT_URL=${DIRECT_URL}
     ports:
-      - "8000:8000"  # Permite que você acesse http://localhost:8000
-    # Removi o volumes e o depends_on porque o banco agora é externo (Supabase)
-    restart: always
+      - "8000:8000"
