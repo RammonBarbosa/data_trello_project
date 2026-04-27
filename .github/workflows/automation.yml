@@ -26,4 +26,4 @@ jobs:
           DIRECT_URL: ${{ secrets.DIRECT_URL }}
         run: |
           docker compose build --no-cache
-          docker compose up app
+          docker compose up --abort-on-container-exit
