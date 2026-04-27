@@ -2,68 +2,65 @@ import requests
 import os
 
 def extract_data():
-    API_KEY = os.getenv('TRELLO_API_KEY')
-    TOKEN = os.getenv('TRELLO_TOKEN')
-    BOARD_ID = os.getenv('TRELLO_BOARD_ID') 
-    
-    # DEBUGAR:
-    print(f"DEBUG: KEY={API_KEY[:5] if API_KEY else 'NULA'}, BOARD={BOARD_ID}")
+    # 1. Carregando variáveis com .strip() para evitar erros de digitação/espaços
+    API_KEY = os.getenv('TRELLO_API_KEY', '').strip()
+    TOKEN = os.getenv('TRELLO_TOKEN', '').strip()
+    BOARD_ID = os.getenv('TRELLO_BOARD_ID', '').strip() 
     
     if not API_KEY or not TOKEN or not BOARD_ID:
-        print("ERRO: Uma ou mais variáveis de ambiente não foram carregadas!")
+        print("ERRO: Variáveis de ambiente (KEY, TOKEN ou BOARD_ID) não encontradas!")
         return []
 
-    # Parâmetros base
     params = {'key': API_KEY, 'token': TOKEN, 'limit': 1000}
-
-    # 1. Puxando as Listas 
-    url_lists = f"https://api.trello.com/1/boards/{BOARD_ID}/lists"
-    resp_lists = requests.get(url_lists, params=params)
-    listas = resp_lists.json() if resp_lists.status_code == 200 else []
-    mapa_listas = {lista['id']: lista['name'] for lista in listas}
-
-    # 2. Puxando os Cartões com Paginação e Filtro de Duplicatas
     all_cards = []
-    seen_ids = set() 
     last_id = None
+    
+    # URL para buscar as listas (tradução de IDs para nomes)
+    url_lists = f"https://api.trello.com/1/boards/{BOARD_ID}/lists"
+    # URL para buscar os cartões
     url_cards = f"https://api.trello.com/1/boards/{BOARD_ID}/cards"
 
-    while True:
-        if last_id:
-            params['before'] = last_id
-        
-        response = requests.get(url_cards, params=params)
-        
-        if response.status_code != 200:
-            print(f"Erro na extração: {response.status_code}")
-            break
-            
-        batch = response.json()
-        
-        if not batch:
-            break
-            
-        # Filtra apenas o que ainda não vimos nesta rodada
-        new_cards = [c for c in batch if c['id'] not in seen_ids]
-        
-        if not new_cards:
-            break
-            
-        all_cards.extend(new_cards)
-        
-        # Alimenta o set de IDs para a próxima verificação
-        for c in new_cards:
-            seen_ids.add(c['id'])
-            
-        last_id = batch[-1]['id']
-        print(f"Lote capturado: {len(all_cards)} cartões únicos...")
+    try:
+        # 2. Puxando as Listas primeiro
+        resp_lists = requests.get(url_lists, params=params)
+        mapa_listas = {}
+        if resp_lists.status_code == 200:
+            listas = resp_lists.json()
+            mapa_listas = {lista['id']: lista['name'] for lista in listas}
+        else:
+            print(f"Aviso: Erro {resp_lists.status_code} ao buscar listas.")
 
-        if len(batch) < 1000:
-            break
+        # 3. Loop de Paginação para buscar todos os cartões (incluindo o 1680º!)
+        while True:
+            if last_id:
+                params['before'] = last_id
+            
+            response = requests.get(url_cards, params=params)
+            
+            if response.status_code != 200:
+                print(f"Erro na extração de cartões: {response.status_code}")
+                print(f"Resposta da API: {response.text}")
+                break
+                
+            batch = response.json()
+            if not batch:
+                break
+                
+            all_cards.extend(batch)
+            last_id = batch[-1]['id'] # Marca o último cartão para o próximo lote
+            
+            print(f"Progresso: {len(all_cards)} cartões capturados...")
 
-    # 3. Injetando o nome da lista
-    for cartao in all_cards:
-        cartao['nome_lista'] = mapa_listas.get(cartao['idList'], 'Desconhecida')
+            if len(batch) < 1000: # Se veio menos de 1000, acabou o quadro
+                break
 
-    print(f"Extração total concluída: {len(all_cards)} cartões!")
-    return all_cards
+        # 4. Injetando o nome da lista em cada cartão
+        for cartao in all_cards:
+            cartao['nome_lista'] = mapa_listas.get(cartao['idList'], 'Desconhecida')
+
+        print(f"Extração concluída com sucesso: {len(all_cards)} cartões processados!")
+        return all_cards
+
+    except Exception as e:
+        print(f"Erro inesperado na extração: {e}")
+        return []
