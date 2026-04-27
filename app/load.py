@@ -1,32 +1,31 @@
 import os
-import pandas as pd
 from sqlalchemy import create_engine
 
 def save_to_postgres(df):
-    # O GitHub Actions injeta o DIRECT_URL aqui automaticamente
-    database_url = os.getenv("DIRECT_URL")
+    # 1. Puxa a URL e já remove espaços em branco que podem vir do GitHub
+    database_url = os.getenv("DIRECT_URL", "").strip()
     
     if not database_url:
-        print("❌ Erro: DIRECT_URL não encontrada. Verifique os Secrets do GitHub.")
+        print("❌ Erro: DIRECT_URL não encontrada.")
         return
 
-    print("Conectando ao Supabase para salvar os dados...")
+    # 2. Garante o prefixo correto para o SQLAlchemy moderno
+    # Se começar com postgres:// ou postgresql://, transformamos no formato completo
+    if database_url.startswith("postgres://"):
+        database_url = database_url.replace("postgres://", "postgresql+psycopg2://", 1)
+    elif database_url.startswith("postgresql://"):
+        database_url = database_url.replace("postgresql://", "postgresql+psycopg2://", 1)
+
+    print("Conectando ao Supabase...")
     
     try:
-        # Criando a conexão
-        # pool_pre_ping ajuda a manter a conexão viva em ambientes de nuvem
+        # 3. Cria o engine com a URL tratada
         engine = create_engine(database_url, pool_pre_ping=True)
         
-        # O 'replace' é vital para limpar os duplicados e manter os 1681 cartões
+        # O 'replace' vai limpar a bagunça anterior e deixar o número exato
         df.to_sql("cards", engine, if_exists="replace", index=False)
         
         print(f"✅ SUCESSO! {len(df)} cartões salvos no Supabase.")
         
     except Exception as e:
         print(f"❌ Erro na carga para o banco: {e}")
-
-# Se você quiser testar este arquivo isoladamente (opcional)
-if __name__ == "__main__":
-    # Apenas para teste local, cria um DF vazio
-    test_df = pd.DataFrame()
-    save_to_postgres(test_df)
