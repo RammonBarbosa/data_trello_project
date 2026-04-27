@@ -25,5 +25,5 @@ jobs:
           TRELLO_BOARD_ID: ${{ secrets.TRELLO_BOARD_ID }}
           DIRECT_URL: ${{ secrets.DIRECT_URL }}
         run: |
-          # O --build força a atualização do script
-          docker compose up --build app
+          docker compose build --no-cache
+          docker compose up app
