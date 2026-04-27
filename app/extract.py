@@ -6,6 +6,13 @@ def extract_data():
     TOKEN = os.getenv('TRELLO_TOKEN')
     BOARD_ID = os.getenv('TRELLO_BOARD_ID') 
     
+    # DEBUGAR:
+    print(f"DEBUG: KEY={API_KEY[:5] if API_KEY else 'NULA'}, BOARD={BOARD_ID}")
+    
+    if not API_KEY or not TOKEN or not BOARD_ID:
+        print("ERRO: Uma ou mais variáveis de ambiente não foram carregadas!")
+        return []
+
     # Parâmetros base
     params = {'key': API_KEY, 'token': TOKEN, 'limit': 1000}
 
